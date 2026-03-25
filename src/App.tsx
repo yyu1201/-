@@ -3,8 +3,15 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { Upload, AlertTriangle, CheckCircle, Video, FileText, Loader2, ShieldAlert, Info, Clock, X, Trash2 } from 'lucide-react';
 import { cn } from './lib/utils';
 
-// Initialize Gemini API
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Initialize Gemini API lazily to prevent crash on load if key is missing
+let ai: GoogleGenAI | null = null;
+try {
+  if (process.env.GEMINI_API_KEY) {
+    ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  }
+} catch (e) {
+  console.error("Failed to initialize Gemini API", e);
+}
 
 interface Finding {
   timestamp: string;
@@ -132,6 +139,11 @@ export default function App() {
 
   const handleAnalyze = async () => {
     if (!file) return;
+    
+    if (!ai) {
+      setError('系统未配置 AI 密钥 (GEMINI_API_KEY)。如果你是在 Vercel 部署的，请在 Vercel 的 Environment Variables 中添加你的密钥，然后重新部署。');
+      return;
+    }
 
     setIsAnalyzing(true);
     setError(null);
