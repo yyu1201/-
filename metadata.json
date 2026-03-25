@@ -1,0 +1,5 @@
+{
+  "name": "AI Video Moderator",
+  "description": "A web-based tool for automatically reviewing and verifying video content using AI.",
+  "requestFramePermissions": []
+}
