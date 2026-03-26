@@ -115,6 +115,9 @@ export default function App() {
       }
 
       setFile(selectedFile);
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
       setPreviewUrl(URL.createObjectURL(selectedFile));
       setReport(null);
       setError(null);
@@ -194,7 +197,7 @@ export default function App() {
           parts: [
             {
               inlineData: {
-                mimeType: file.type,
+                mimeType: file.type || 'video/mp4',
                 data: base64Data,
               },
             },
