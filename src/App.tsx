@@ -7,17 +7,7 @@ import { cn } from './lib/utils';
 let ai: GoogleGenAI | null = null;
 try {
   if (process.env.GEMINI_API_KEY) {
-    // Check if a custom base URL is provided (e.g., for third-party API proxies)
-    const baseUrl = import.meta.env.VITE_GEMINI_BASE_URL;
-    
-    if (baseUrl) {
-       ai = new GoogleGenAI({ 
-         apiKey: process.env.GEMINI_API_KEY,
-         httpOptions: { baseUrl: baseUrl }
-       });
-    } else {
-       ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    }
+    ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   }
 } catch (e) {
   console.error("Failed to initialize Gemini API", e);
@@ -196,7 +186,7 @@ export default function App() {
 
       const prompt = `你是一个专业的视频内容审核员和事实核查员。请根据以下审核标准对提供的视频进行严格审查：\n\n审核标准：\n${criteria}\n\n请仔细观看视频画面并聆听音频，找出任何违反标准的地方，或者事实不准确的内容。返回JSON格式的报告。`;
 
-      const modelName = import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.1-pro-preview';
+      const modelName = 'gemini-3.1-pro-preview';
       
       const response = await ai.models.generateContent({
         model: modelName,
