@@ -189,7 +189,8 @@ export default function App() {
 
       const prompt = `你是一个专业的视频内容审核员和事实核查员。请根据以下审核标准对提供的视频进行严格审查：\n\n审核标准：\n${criteria}\n\n请仔细观看视频画面并聆听音频，找出任何违反标准的地方，或者事实不准确的内容。返回JSON格式的报告。`;
 
-      const modelName = 'gemini-3.1-pro-preview';
+      // 使用 Flash 模型，每天有 1500 次免费额度，速度更快，不容易超限
+      const modelName = 'gemini-3-flash-preview';
       
       const response = await ai.models.generateContent({
         model: modelName,
