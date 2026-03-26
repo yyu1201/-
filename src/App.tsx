@@ -190,7 +190,7 @@ export default function App() {
       const prompt = `你是一个专业的视频内容审核员和事实核查员。请根据以下审核标准对提供的视频进行严格审查：\n\n审核标准：\n${criteria}\n\n请仔细观看视频画面并聆听音频，找出任何违反标准的地方，或者事实不准确的内容。返回JSON格式的报告。`;
 
       // 使用 Flash 模型，每天有 1500 次免费额度，速度更快，不容易超限
-      const modelName = 'gemini-3-flash-preview';
+      const modelName = 'gemini-flash-latest';
       
       const response = await ai.models.generateContent({
         model: modelName,
@@ -243,9 +243,9 @@ export default function App() {
       const errorMessage = String(err?.message || err);
       
       if (errorMessage.includes('429') || errorMessage.includes('Quota') || errorMessage.includes('RESOURCE_EXHAUSTED')) {
-        setError('分析失败：您今天使用的 AI 额度已耗尽 (Quota Exceeded)。因为使用的是免费的 API 密钥，每天有调用次数限制。请明天再试，或者更换一个新的 API 密钥。');
+        setError(`分析失败：您今天使用的 AI 额度已耗尽 (Quota Exceeded)。\n\n【开发者调试信息】真实报错：${errorMessage}`);
       } else {
-        setError(errorMessage || '分析视频时发生错误，请重试。');
+        setError(`分析视频时发生错误，请重试。\n\n【开发者调试信息】真实报错：${errorMessage}`);
       }
     } finally {
       setIsAnalyzing(false);
