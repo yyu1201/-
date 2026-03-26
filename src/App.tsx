@@ -210,6 +210,10 @@ export default function App() {
         let cleanJson = response.text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
         try {
           const parsedReport = JSON.parse(cleanJson) as ModerationReport;
+          // Ensure findings is always an array to prevent render crashes
+          if (!parsedReport.findings) {
+            parsedReport.findings = [];
+          }
           setReport(parsedReport);
           saveToHistory(file.name, parsedReport);
         } catch (parseError) {
@@ -220,8 +224,14 @@ export default function App() {
         throw new Error('AI 未能生成审核报告。');
       }
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || '分析视频时发生错误，请重试。');
+      console.error("Full error object:", err);
+      const errorMessage = err?.message || String(err);
+      
+      if (errorMessage.includes('429') || errorMessage.includes('Quota') || errorMessage.includes('RESOURCE_EXHAUSTED')) {
+        setError('分析失败：您今天使用的 AI 额度已耗尽 (Quota Exceeded)。因为使用的是免费的 API 密钥，每天有调用次数限制。请明天再试，或者更换一个新的 API 密钥。');
+      } else {
+        setError(errorMessage || '分析视频时发生错误，请重试。');
+      }
     } finally {
       setIsAnalyzing(false);
     }
@@ -491,16 +501,16 @@ export default function App() {
 
                     {/* Timeline / Findings */}
                     <div>
-                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">发现的问题点 ({report.findings.length})</h3>
+                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">发现的问题点 ({(report.findings || []).length})</h3>
                       
-                      {report.findings.length === 0 ? (
+                      {(report.findings || []).length === 0 ? (
                         <div className="text-center py-8 bg-white rounded-xl border border-slate-200 border-dashed">
                           <CheckCircle className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
                           <p className="text-sm text-slate-500">未发现任何违规或异常内容</p>
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          {report.findings.map((finding, idx) => (
+                          {(report.findings || []).map((finding, idx) => (
                             <div key={idx} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex gap-4 relative overflow-hidden">
                               {/* Left decorative line */}
                               <div className={cn(
