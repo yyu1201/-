@@ -300,7 +300,7 @@ export default function App() {
               className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors bg-slate-100 hover:bg-blue-50 px-3 py-1.5 rounded-full"
             >
               <Clock className="w-4 h-4" />
-              历史记录
+              <span>历史记录</span>
             </button>
           </div>
         </div>
@@ -317,7 +317,7 @@ export default function App() {
               <div className="p-5 border-b border-slate-100 bg-slate-50/50">
                 <h2 className="font-medium flex items-center gap-2">
                   <Video className="w-4 h-4 text-blue-600" />
-                  1. 上传待审视频
+                  <span>1. 上传待审视频</span>
                 </h2>
               </div>
               <div className="p-5">
@@ -372,7 +372,7 @@ export default function App() {
               <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <h2 className="font-medium flex items-center gap-2">
                   <FileText className="w-4 h-4 text-blue-600" />
-                  2. 设置审核标准
+                  <span>2. 设置审核标准</span>
                 </h2>
               </div>
               <div className="p-5">
@@ -418,12 +418,12 @@ export default function App() {
               {isAnalyzing ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  AI 正在逐帧分析中...
+                  <span>AI 正在逐帧分析中...</span>
                 </>
               ) : (
                 <>
                   <ShieldAlert className="w-5 h-5" />
-                  开始智能审核
+                  <span>开始智能审核</span>
                 </>
               )}
             </button>
@@ -449,7 +449,7 @@ export default function App() {
               <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <h2 className="font-medium flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-blue-600" />
-                  审核分析报告
+                  <span>审核分析报告</span>
                 </h2>
                 {report && (
                   <span className="text-xs font-medium text-slate-400">
@@ -516,7 +516,7 @@ export default function App() {
 
                     {/* Timeline / Findings */}
                     <div>
-                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">发现的问题点 ({(report.findings || []).length})</h3>
+                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4"><span>发现的问题点 ({(report.findings || []).length})</span></h3>
                       
                       {(report.findings || []).length === 0 ? (
                         <div className="text-center py-8 bg-white rounded-xl border border-slate-200 border-dashed">
@@ -578,7 +578,7 @@ export default function App() {
             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <h2 className="font-semibold flex items-center gap-2 text-slate-800">
                 <Clock className="w-4 h-4 text-blue-600"/> 
-                审核历史记录
+                <span>审核历史记录</span>
               </h2>
               <button 
                 onClick={() => setShowHistory(false)} 
@@ -629,7 +629,7 @@ export default function App() {
                   className="w-full py-2.5 flex items-center justify-center gap-2 text-sm font-medium text-rose-600 hover:bg-rose-100 rounded-xl transition-colors"
                 >
                   <Trash2 className="w-4 h-4"/> 
-                  清空所有记录
+                  <span>清空所有记录</span>
                 </button>
               </div>
             )}
