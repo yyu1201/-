@@ -7,7 +7,17 @@ import { cn } from './lib/utils';
 let ai: GoogleGenAI | null = null;
 try {
   if (process.env.GEMINI_API_KEY) {
-    ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    // Check if a custom base URL is provided (e.g., for third-party API proxies)
+    const baseUrl = import.meta.env.VITE_GEMINI_BASE_URL;
+    
+    if (baseUrl) {
+       ai = new GoogleGenAI({ 
+         apiKey: process.env.GEMINI_API_KEY,
+         httpOptions: { baseUrl: baseUrl }
+       });
+    } else {
+       ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    }
   }
 } catch (e) {
   console.error("Failed to initialize Gemini API", e);
@@ -186,8 +196,10 @@ export default function App() {
 
       const prompt = `你是一个专业的视频内容审核员和事实核查员。请根据以下审核标准对提供的视频进行严格审查：\n\n审核标准：\n${criteria}\n\n请仔细观看视频画面并聆听音频，找出任何违反标准的地方，或者事实不准确的内容。返回JSON格式的报告。`;
 
+      const modelName = import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.1-pro-preview';
+      
       const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
+        model: modelName,
         contents: {
           parts: [
             {
@@ -209,13 +221,22 @@ export default function App() {
       if (response.text) {
         let cleanJson = response.text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
         try {
-          const parsedReport = JSON.parse(cleanJson) as ModerationReport;
-          // Ensure findings is always an array to prevent render crashes
-          if (!parsedReport.findings) {
-            parsedReport.findings = [];
+          const parsedReport = JSON.parse(cleanJson) as any;
+          
+          // Validate structure to prevent React render crashes
+          if (typeof parsedReport !== 'object' || parsedReport === null) {
+            throw new Error('Invalid response format');
           }
-          setReport(parsedReport);
-          saveToHistory(file.name, parsedReport);
+          
+          const safeReport: ModerationReport = {
+            status: typeof parsedReport.status === 'string' ? parsedReport.status as any : 'Needs Review',
+            confidence: typeof parsedReport.confidence === 'number' ? parsedReport.confidence : 0,
+            summary: typeof parsedReport.summary === 'string' ? parsedReport.summary : JSON.stringify(parsedReport.summary || '无摘要'),
+            findings: Array.isArray(parsedReport.findings) ? parsedReport.findings : []
+          };
+          
+          setReport(safeReport);
+          saveToHistory(file.name, safeReport);
         } catch (parseError) {
           console.error("Raw AI Response:", response.text);
           throw new Error('AI 返回的数据格式不正确，无法解析报告。请重试。');
@@ -225,7 +246,7 @@ export default function App() {
       }
     } catch (err: any) {
       console.error("Full error object:", err);
-      const errorMessage = err?.message || String(err);
+      const errorMessage = String(err?.message || err);
       
       if (errorMessage.includes('429') || errorMessage.includes('Quota') || errorMessage.includes('RESOURCE_EXHAUSTED')) {
         setError('分析失败：您今天使用的 AI 额度已耗尽 (Quota Exceeded)。因为使用的是免费的 API 密钥，每天有调用次数限制。请明天再试，或者更换一个新的 API 密钥。');
